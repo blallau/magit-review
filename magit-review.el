@@ -369,7 +369,7 @@
 
       (when (string= branch-remote ".")
 	(setq branch-remote magit-review-remote))
-      (if (string= status "draft")
+      (if (string= status "drafts")
 	  (magit-run-git-async "review -D")
 	(magit-run-git-async "review"))))
 
