@@ -11,11 +11,11 @@ An emacs minor mode for reporting inline on coverage stats for Python
 
 Put something like this in your .emacs
 
-(require 'magit-review)
-;; Gerrit URL
-(setq gerrit-review-url "https://review.openstack.org/#q,%s,n,z")
-;; Gerrit remote name can be set with:
-(setq magit-review-remote "gerrit")
+	(require 'magit-review)
+	;; Gerrit URL
+	(setq gerrit-review-url "https://review.openstack.org/#q,%s,n,z")
+	;; Gerrit remote name can be set with:
+	(setq magit-review-remote "gerrit")
 
 # Running
 
