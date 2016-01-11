@@ -1,6 +1,6 @@
 # magit-review
 
-An emacs minor mode for reporting inline on coverage stats for Python
+Emacs Magit plugin for git review command
 
 # Dependencies
 
