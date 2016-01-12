@@ -132,10 +132,10 @@
 							(format "%s (%s)" branch topic)
 						      (format "%s" branch))
 						    btmaxlen)
-			 'face 'magit-log-author))
+			 'face '(:foreground "deep sky blue")))
 
 	 (owner (propertize (magit-review-string-trunc owner ownermaxlen)
-			    'face '(:foreground "deep sky blue")))
+			    'face 'magit-log-author))
 
 	 (subjmaxlen (min 50 (- wid nlen ownermaxlen btmaxlen 6)))
 
@@ -178,6 +178,8 @@
 	     (topic (cdr-safe (assoc 'topic jobj)))
 	     (change_id (cdr-safe (assoc 'change_id jobj)))
 	     (subj (cdr-safe (assoc 'subject jobj)))
+	     ;; "created": "2016-01-12 20:38:22.000000000",
+	     ;; "updated": "2016-01-12 20:43:10.000000000",
 	     (merg (cdr-safe (assoc 'mergeable jobj)))
 	     (ins_num (cdr-safe (assoc 'insertions jobj)))
 	     (del_num (cdr-safe (assoc 'deletions jobj)))
@@ -217,7 +219,9 @@
 	     (subj (cdr-safe (assoc 'subject jobj)))
 	     (owner (cdr-safe (assoc 'owner jobj)))
 	     (owner-name (cdr-safe (assoc 'name owner)))
-	     (message (cdr-safe (assoc 'commitMessage jobj))))
+	     (message (cdr-safe (assoc 'commitMessage jobj)))
+	     ;;createdOn":1452631102,"lastUpdated":1452631390
+	     )
 	(if (and beg end)
 	    (delete-region beg end))
 	(when (and num subj branch)
