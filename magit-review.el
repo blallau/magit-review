@@ -89,27 +89,35 @@
 (defun magit-review-pp-https-review (num subj branch topic merg &optional ins_num del_num)
   ;; window-width - two prevents long line arrow from being shown
   (let* ((wid (window-width))
+
 	 (numstr (propertize (format "%-8s" num) 'face 'magit-hash))
 	 (nlen (length numstr))
-	 (btmaxlen (/ wid 3))
 
+	 (diff (concat "["
+		       (propertize (format "+%s" ins_num) 'face '(:foreground "green yellow" :weight bold))
+		       " "
+		       (propertize (format "-%s" del_num) 'face '(:foreground "red" :weight bold))
+		       "]"))
+
+	 (difflen (length diff))
+	 (btmaxlen (/ wid 3))
 	 (bt (propertize (magit-review-string-trunc (if topic
 							(format "%s (%s)" branch topic)
 						      (format "%s" branch))
 						    btmaxlen)
-			 'face 'magit-log-author))
+			 'face '(:foreground "deep sky blue")))
 
-	 (subjmaxlen (min 50 (- wid nlen btmaxlen 5)))
-
+	 (subjmaxlen (min 50 (- wid nlen btmaxlen difflen 5)))
 	 (subjstr (propertize (magit-review-string-trunc subj subjmaxlen)
 			      'face
 			      (if (equal merg :json-false)
 				  'magit-signature-bad
 				'magit-signature-good)))
 	 (padding (make-string
-		     (max 0 (- wid (+ nlen 1 (length bt) (length subjstr))))
+		     (max 0 (- wid (+ nlen 1 (length bt) 2 difflen (length subjstr))))
 		     ? )))
-    (format "%s%s%s%s\n" numstr subjstr padding bt)))
+
+    (format "%s%s  %s%s%s\n" numstr subjstr diff padding bt)))
 
 (defun magit-review-pp-ssh-review (num subj branch topic owner)
   ;; window-width - two prevents long line arrow from being shown
@@ -191,15 +199,15 @@
 	     (change_id (cdr-safe (assoc 'change_id jobj)))
 	     (subj (cdr-safe (assoc 'subject jobj)))
 	     (merg (cdr-safe (assoc 'mergeable jobj)))
-	     (ins_numb (cdr-safe (assoc 'insertions jobj)))
-	     (del_numb (cdr-safe (assoc 'deletions jobj)))
+	     (ins_num (cdr-safe (assoc 'insertions jobj)))
+	     (del_num (cdr-safe (assoc 'deletions jobj)))
 	     (num (cdr-safe (assoc '_number jobj))))
 	(if (and beg end)
 	    (delete-region beg end))
 	(when (and num subj branch)
 	  (magit-insert-section (section subj)
 	    (insert (propertize
-		     (magit-review-pp-https-review num subj branch topic merg)
+		     (magit-review-pp-https-review num subj branch topic merg ins_num del_num)
 		     'magit-review-jobj
 		     jobj))
 	    (add-text-properties beg (point) (list 'magit-review-jobj jobj)))

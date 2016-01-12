@@ -9,7 +9,10 @@ Emacs Magit plugin for git review command
 
 # Installation
 
+Download `magit-review.el` and ensure it is in a directory in your `load-path`.
+
 Put something like this in your .emacs
+
 
 	(require 'magit-review)
 	;; Gerrit URL
@@ -24,3 +27,13 @@ M-x magit-status
 # Links
 
 https://github.com/blallau/magit-review
+
+# Author
+
+Bertrand Lallau  ( bertrand.lallau@gmail.com )
+
+# Acknowledgements
+
+Thanks for using and improving magit-gerrit! Enjoy!
+
+Please help improve magit-gerrit! Pull requests welcomed!
