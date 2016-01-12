@@ -49,7 +49,7 @@
 
 (defvar gerrit-review-url "https://review.openstack.org/#q,%s,n,z" "Gerrit review URL")
 
-(defvar magit-review-remote "gerrit"
+(defvar magit-review-remote "origin"
   "Default remote name to use for gerrit (e.g. \"origin\", \"gerrit\")")
 
 (defvar-local git-review-protocol nil "Git protocol used")
