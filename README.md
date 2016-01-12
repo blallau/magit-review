@@ -28,12 +28,16 @@ M-x magit-status
 
 https://github.com/blallau/magit-review
 
+* Inspired by :
+
+    * https://github.com/terranpro/magit-gerrit
+
 # Author
 
 Bertrand Lallau  ( bertrand.lallau@gmail.com )
 
 # Acknowledgements
 
-Thanks for using and improving magit-gerrit! Enjoy!
+Thanks for using and improving magit-review! Enjoy!
 
-Please help improve magit-gerrit! Pull requests welcomed!
+Please help improve magit-review! Pull requests welcomed!
