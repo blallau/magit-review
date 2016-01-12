@@ -5,7 +5,6 @@ Emacs Magit plugin for git review command
 # Dependencies
 
 * magit 2.4.0
-* projectile 0.13.0
 
 # Installation
 
