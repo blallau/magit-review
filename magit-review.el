@@ -135,7 +135,7 @@
 			 'face 'magit-log-author))
 
 	 (owner (propertize (magit-review-string-trunc owner ownermaxlen)
-			    'face 'magit-log-author))
+			    'face '(:foreground "deep sky blue")))
 
 	 (subjmaxlen (min 50 (- wid nlen ownermaxlen btmaxlen 6)))
 
