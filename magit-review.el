@@ -477,25 +477,27 @@
       (setq git-review-protocol "https")))
     (magit-review-mode t)))
 
-;; Hack in dir-local variables that might be set for magit review
-(add-hook 'magit-status-mode-hook #'hack-dir-local-variables-non-file-buffer t)
-
-;; Try to auto enable magit-review in the magit-status buffer
-(add-hook 'magit-status-mode-hook #'magit-review-enable t)
-(add-hook 'magit-log-mode-hook #'magit-review-enable t)
-
-(defun magit-review-switch-project ()
+(defun magit-review-before-switch-project ()
   (interactive)
   ;; remove previous hook if any
   (remove-hook 'magit-status-mode-hook #'magit-review-enable t)
-  (remove-hook 'magit-log-mode-hook #'magit-review-enable t)
+  (remove-hook 'magit-log-mode-hook #'magit-review-enable t))
 
+(defun magit-review-after-switch-project ()
+  (interactive)
   (when (magit-review-check-gerrit-enabled)
     ;; add hook
     (add-hook 'magit-status-mode-hook #'magit-review-enable t)
     (add-hook 'magit-log-mode-hook #'magit-review-enable t)))
 
-(add-hook 'projectile-switch-project-hook #'magit-review-switch-project)
+;; Hack in dir-local variables that might be set for magit review
+(add-hook 'magit-status-mode-hook #'hack-dir-local-variables-non-file-buffer t)
+
+(when (projectile-project-p)
+  (magit-review-after-switch-project))
+
+(add-hook 'projectile-before-switch-project-hook #'magit-review-before-switch-project)
+(add-hook 'projectile-after-switch-project-hook #'magit-review-after-switch-project)
 
 (provide 'magit-review)
 
