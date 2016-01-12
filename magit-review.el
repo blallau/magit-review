@@ -6,7 +6,7 @@
 ;; URL: https://github.com/blallau/magit-review
 ;; Version: 0.0.1
 ;; Keywords: tools gerrit git
-;; Package-Requires: ((emacs "25.0") (magit "2.4.0") (projectile "0.13.0"))
+;; Package-Requires: ((emacs "25.0") (magit "2.4.0"))
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -37,16 +37,13 @@
 ;; If your git remote for gerrit is not the default "origin", then
 ;; `magit-review-remote' should be adjusted accordingly (e.g. "gerrit")
 ;;
-;; Recommended to auto add reviewers via git hooks (precommit), rather
-;; than manually performing 'R A' for every review.
-;;
-;; `magit-review' will be enabled automatically on `magit-status'.
+;; `magit-review' will be enabled automatically on `magit-status' if
+;; the git review is configured (.gitreview fle exists)
 ;;
 ;;; Code:
 
 (require 'json)
 (require 'magit)
-(require 'projectile)
 
 (defvar git-review-file ".gitreview" "git review conf file name")
 
@@ -55,7 +52,7 @@
 (defvar magit-review-remote "gerrit"
   "Default remote name to use for gerrit (e.g. \"origin\", \"gerrit\")")
 
-(defvar-local git-review-protocol nil "Protocol used by project gerrit repository")
+(defvar-local git-review-protocol nil "Git protocol used")
 
 (defgroup magit-review nil
   "magit review custom group"
@@ -96,9 +93,11 @@
 	 (nlen (length numstr))
 
 	 (diff (concat "["
-		       (propertize (format "+%s" ins_num) 'face '(:foreground "green yellow" :weight bold))
+		       (propertize (if (> ins_num 0) (format "+%s" ins_num) (format "%s" ins_num))
+				   'face '(:foreground "green yellow" :weight bold))
 		       " "
-		       (propertize (format "-%s" del_num) 'face '(:foreground "red" :weight bold))
+		       (propertize (if (> del_num 0) (format "-%s" del_num) (format "%s" del_num))
+				   'face '(:foreground "red" :weight bold))
 		       "]"))
 
 	 (difflen (length diff))
@@ -172,27 +171,6 @@
 	  (delete-region (point-at-bol) (point-max))
 	  (goto-char (point-min))))
       ;; process JSON
-
-      ;; "id": "openstack%2Foctavia~master~Ic3d3d1d63a5cc352c5fc00dea58bb16915754a7c",
-      ;; "project": "openstack/octavia",
-      ;; "branch": "master",
-      ;; "topic": "bug/1490033",
-      ;; "hashtags": [
-
-      ;; ],
-      ;; "change_id": "Ic3d3d1d63a5cc352c5fc00dea58bb16915754a7c",
-      ;; "subject": "WIP - Allow health manager to listen on mgmt net",
-      ;; "status": "NEW",
-      ;; "created": "2016-01-08 15:51:46.000000000",
-      ;; "updated": "2016-01-08 17:13:10.000000000",
-      ;; "mergeable": true,
-      ;; "insertions": 15,
-      ;; "deletions": 0,
-      ;; "_number": 265322,
-      ;; "owner": {
-      ;;   "_account_id": 6951
-      ;; }
-
       (let* ((beg (point))
 	     (jobj (json-read))
 	     (end (point-at-eol))
@@ -229,25 +207,6 @@
 	  (goto-char (point-min))))
 
       ;; process JSON
-
-      ;; "project": "openstack/octavia",
-      ;; "branch": "master",
-      ;; "topic": "bug/1490033",
-      ;; "id": "Ic3d3d1d63a5cc352c5fc00dea58bb16915754a7c",
-      ;; "number": "265322",
-      ;; "subject": "WIP - Allow health manager to listen on mgmt net",
-      ;; "owner": {
-      ;;   "name": "toto",
-      ;;   "email": "toto@toto.com",
-      ;;   "username": "toto"
-      ;; },
-      ;; "url": "https://review.openstack.org/265322",
-      ;; "commitMessage": "WIP - Allow health manager to listen on mgmt net\n\nChange-Id: Ic3d3d1d63a5cc352c5fc00dea58bb16915754a7c\nCloses-Bug: #1490033\n",
-      ;; "createdOn": 1452268306,
-      ;; "lastUpdated": 1452273190,
-      ;; "open": true,
-      ;; "status": "NEW"
-
       (let* ((beg (point))
 	     (jobj (json-read))
 	     (end (point-at-eol))
@@ -257,7 +216,8 @@
 	     (num (cdr-safe (assoc 'number jobj)))
 	     (subj (cdr-safe (assoc 'subject jobj)))
 	     (owner (cdr-safe (assoc 'owner jobj)))
-	     (owner-name (cdr-safe (assoc 'name owner))))
+	     (owner-name (cdr-safe (assoc 'name owner)))
+	     (message (cdr-safe (assoc 'commitMessage jobj))))
 	(if (and beg end)
 	    (delete-region beg end))
 	(when (and num subj branch)
@@ -294,22 +254,7 @@
 	  (number-to-string (cdr (assoc '_number jobj))))
 	 ((string= git-review-protocol "ssh")
 	  (cdr (assoc 'number jobj))))
-      nil
-      )))
-
-;; (defun magit-gerrit-view-patchset-diff ()
-;;   "View the Diff for a Patchset"
-;;   (interactive)
-;;   (let ((jobj (magit-gerrit-review-at-point)))
-;;     (when jobj
-;;       (let ((ref (cdr (assoc 'ref (assoc 'currentPatchSet jobj))))
-;; 	    (dir default-directory))
-;; 	(let* ((magit-proc (magit-fetch magit-gerrit-remote ref)))
-;; 	  (message (format "Waiting a git fetch from %s to complete..."
-;; 			   magit-gerrit-remote))
-;; 	  (magit-process-wait))
-;; 	(message (format "Generating Gerrit Patchset for refs %s dir %s" ref dir))
-;; 	(magit-diff "FETCH_HEAD~1..FETCH_HEAD")))))
+      nil)))
 
 ;;;###autoload
 (defun magit-review-download-review ()
@@ -325,30 +270,6 @@
 	  (magit-process-wait))
 	(message (format "Checking out to %s in %s" topic dir))))))
 
-;; (defun gerrit-check-if-repo-modified ()
-;;   "Check if current repo has been modified."
-;;   (null (magit-git-items "status" "-z" "-uno" "--porcelain")))
-
-;; (defun magit-gerrit-download ()
-;;   (interactive (list (read-string "Review-ID: ")))
-;;   (let* ((project (projectile-project-name))
-;;          (default-directory (projectile-project-root)))
-;;     (magit-with-toplevel
-;;       (setq gerrit-project-cwd default-directory)
-;;       (unless (gerrit-check-if-repo-modified)
-;;         (error "%s has changes, not processing" project))
-;;       (let ((proc (concat "git-review[" review-id "]")))
-;;         (message "Starting git-review...")
-;;         (start-process proc "*git review*" gerrit-review-program "-d" review-id)
-;;         (set-process-sentinel
-;;          (get-process proc)
-;;          #'(lambda (process event)
-;;              (let ((default-directory gerrit-project-cwd))
-;;                (message event)
-;;                (if (string= event "finished\n")
-;;                    (magit-show-commit "HEAD")
-;; 		 (error "Error while downloading review, check *git review* buffer.")))))))))
-
 ;;;###autoload
 (defun magit-review-browse-review ()
   "Browse the Gerrit Review with a browser."
@@ -358,7 +279,7 @@
       (let ((gerrit-url (format gerrit-review-url number)))
 	(browse-url gerrit-url)))))
 
-(defun magit-insert-gerrit-reviews ()
+(defun magit-insert-reviews ()
   (magit-review-section 'gerrit-reviews
 			"Reviews:" 'magit-review-wash-reviews
 			(review-query)))
@@ -430,9 +351,9 @@
       (error "You *must* set `magit-review-remote' to a valid Gerrit remote"))
   (cond
    (magit-review-mode
-    ;; add magit-insert-gerrit-reviews section next to magit-insert-stashes section
+    ;; add magit-insert-reviews section next to magit-insert-stashes section
     (magit-add-section-hook 'magit-status-sections-hook
-			    'magit-insert-gerrit-reviews
+			    'magit-insert-reviews
 			    'magit-insert-stashes t t)
     (add-hook 'magit-create-branch-command-hook
 	      'magit-review-create-branch nil t)
@@ -443,7 +364,7 @@
 
    (t
     (remove-hook 'magit-after-insert-stashes-hook
-		 'magit-insert-gerrit-reviews t)
+		 'magit-insert-reviews t)
     (remove-hook 'magit-create-branch-command-hook
 		 'magit-review-create-branch t)
     (remove-hook 'magit-remote-update-command-hook
@@ -454,50 +375,30 @@
     (magit-refresh)))
 
 (defun magit-review-check-gerrit-enabled ()
-  (let* ((project-root (projectile-project-root))
-	 (remote-url (magit-review-get-remote-url))
-	 (url-type (url-type (url-generic-parse-url remote-url))))
-
-    (when (not (file-exists-p (concat project-root git-review-file)))
-      (error (format "%s file not found in %s\nLaunch git review -s" git-review-file project-root)))
-
-    (if (or (string= url-type "ssh")
-	    (string= url-type "https"))
+  (let ((project-root (magit-toplevel)))
+    (if (file-exists-p (concat project-root git-review-file))
 	t
-      (error (format "%s repository url is not set" magit-review-remote))
       nil)))
 
 (defun magit-review-enable ()
-  (let* ((remote-url (magit-review-get-remote-url))
-	 (url-type (url-type (url-generic-parse-url remote-url))))
-    (cond
-     ((string= url-type "ssh")
-      (setq git-review-protocol "ssh"))
-     ((string= url-type "https")
-      (setq git-review-protocol "https")))
-    (magit-review-mode t)))
-
-(defun magit-review-before-switch-project ()
-  (interactive)
-  ;; remove previous hook if any
-  (remove-hook 'magit-status-mode-hook #'magit-review-enable t)
-  (remove-hook 'magit-log-mode-hook #'magit-review-enable t))
-
-(defun magit-review-after-switch-project ()
-  (interactive)
+  ;;  check git review
   (when (magit-review-check-gerrit-enabled)
-    ;; add hook
-    (add-hook 'magit-status-mode-hook #'magit-review-enable t)
-    (add-hook 'magit-log-mode-hook #'magit-review-enable t)))
+    (let* ((remote-url (magit-review-get-remote-url))
+	   (url-type (url-type (url-generic-parse-url remote-url))))
+      (cond
+       ((string= url-type "ssh")
+	(set (make-local-variable 'git-review-protocol) "ssh"))
+       ((string= url-type "https")
+	(set (make-local-variable 'git-review-protocol) "https")))
+      ;; update keymap with prefix incase it has changed
+      (define-key magit-review-mode-map magit-review-popup-prefix 'magit-review-popup)
+      (magit-review-mode t))))
 
 ;; Hack in dir-local variables that might be set for magit review
 (add-hook 'magit-status-mode-hook #'hack-dir-local-variables-non-file-buffer t)
 
-(when (projectile-project-p)
-  (magit-review-after-switch-project))
-
-(add-hook 'projectile-before-switch-project-hook #'magit-review-before-switch-project)
-(add-hook 'projectile-after-switch-project-hook #'magit-review-after-switch-project)
+(add-hook 'magit-status-mode-hook #'magit-review-enable t)
+(add-hook 'magit-log-mode-hook #'magit-review-enable t)
 
 (provide 'magit-review)
 

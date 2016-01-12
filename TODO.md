@@ -4,3 +4,4 @@
 * add git review diff display
 * enhance README.md file
 * integrate git-review to ELPA ???
+* display review numbers in "Reviews" section title
