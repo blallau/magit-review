@@ -23,7 +23,7 @@
 
 ;;; Commentary:
 ;;
-;; Magit plugin for git review command (list, download, browse)
+;; Magit plugin for git review commands (list, download, browse, review)
 ;;
 ;;; To Use:
 ;;
@@ -47,6 +47,8 @@
 (require 'json)
 (require 'magit)
 (require 'projectile)
+
+(defvar git-review-file ".gitreview" "git review conf file name")
 
 (defvar gerrit-review-url "https://review.openstack.org/#q,%s,n,z" "Gerrit review URL")
 
@@ -452,8 +454,13 @@
     (magit-refresh)))
 
 (defun magit-review-check-gerrit-enabled ()
-  (let* ((remote-url (magit-review-get-remote-url))
+  (let* ((project-root (projectile-project-root))
+	 (remote-url (magit-review-get-remote-url))
 	 (url-type (url-type (url-generic-parse-url remote-url))))
+
+    (when (not (file-exists-p (concat project-root git-review-file)))
+      (error (format "%s file not found in %s\nLaunch git review -s" git-review-file project-root)))
+
     (if (or (string= url-type "ssh")
 	    (string= url-type "https"))
 	t
@@ -483,7 +490,7 @@
   (remove-hook 'magit-status-mode-hook #'magit-review-enable t)
   (remove-hook 'magit-log-mode-hook #'magit-review-enable t)
 
-  (when (and (projectile-project-p) (magit-review-check-gerrit-enabled))
+  (when (magit-review-check-gerrit-enabled)
     ;; add hook
     (add-hook 'magit-status-mode-hook #'magit-review-enable t)
     (add-hook 'magit-log-mode-hook #'magit-review-enable t)))
