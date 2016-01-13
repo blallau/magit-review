@@ -114,6 +114,10 @@
   "Face for review not mergeable."
   :group 'review-faces)
 
+(defun magit-review-pp-commit (commit-msg)
+  (let ((commit-msg-str (propertize (format "%s" commit-msg) 'face 'magit-refname)))
+    (format "%s" commit-msg-str)))
+
 (defun magit-review-pp-https-review (num subj branch topic create update &optional merg ins_num del_num)
   ;; window-width - two prevents long line arrow from being shown
   (let* ((wid (window-width))
@@ -259,7 +263,7 @@
 	     (subj (cdr-safe (assoc 'subject jobj)))
 	     (owner (cdr-safe (assoc 'owner jobj)))
 	     (owner-name (cdr-safe (assoc 'name owner)))
-	     (message (cdr-safe (assoc 'commitMessage jobj)))
+	     (commit-msg (cdr-safe (assoc 'commitMessage jobj)))
 	     ;;createdOn":1452631102,"lastUpdated":1452631390
 	     (create (cdr-safe (assoc 'createdOn jobj)))
 	     (update (cdr-safe (assoc 'lastUpdated jobj))))
@@ -271,6 +275,9 @@
 		     (magit-review-pp-ssh-review num subj branch topic create update owner-name)
 		     'magit-review-jobj
 		     jobj))
+	    (unless (magit-section-hidden (magit-current-section))
+	      (magit-insert-section (section commit-msg)
+		(insert (magit-review-pp-commit commit-msg) "\n")))
 	    (add-text-properties beg (point) (list 'magit-review-jobj jobj)))
 	  t))))))
 
