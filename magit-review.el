@@ -48,6 +48,7 @@
 (defvar git-review-file ".gitreview" "git review conf file name")
 
 (defvar gerrit-review-url "https://review.openstack.org/#q,%s,n,z" "Gerrit review URL")
+(defvar review-new-period 1 "")
 
 (defvar magit-review-remote "origin"
   "Default remote name to use for gerrit (e.g. \"origin\", \"gerrit\")")
@@ -85,11 +86,25 @@
 	      "...")
     str))
 
-(defun magit-review-pp-https-review (num subj branch topic merg &optional ins_num del_num)
+(defun is-new-review (create update)
+  (let* ((current (current-time))
+	 (review-update (if (string= git-review-protocol "https")
+			    (date-to-time update)
+			  (seconds-to-time update))))
+    (time-less-p (time-subtract current review-update)
+		 (seconds-to-time (* 60 60 review-new-period)))))
+
+(defun magit-review-pp-https-review (num subj branch topic create update &optional merg ins_num del_num)
   ;; window-width - two prevents long line arrow from being shown
   (let* ((wid (window-width))
 
-	 (numstr (propertize (format "%-8s" num) 'face 'magit-hash))
+	 (numstr (propertize (format "%-8s" num)
+			     'face
+			     'magit-hash
+			     ;; (if (is-new-review create update)
+			     ;; 	 'magit-number-bold
+			     ;;   'magit-number)
+			     ))
 	 (nlen (length numstr))
 
 	 (diff (concat "["
@@ -117,10 +132,9 @@
 	 (padding (make-string
 		     (max 0 (- wid (+ nlen 1 (length bt) 2 difflen (length subjstr))))
 		     ? )))
-
     (format "%s%s  %s%s%s\n" numstr subjstr diff padding bt)))
 
-(defun magit-review-pp-ssh-review (num subj branch topic owner)
+(defun magit-review-pp-ssh-review (num subj branch topic create update &optional owner)
   ;; window-width - two prevents long line arrow from being shown
   (let* ((wid (window-width))
 	 (numstr (propertize (format "%-8s" num) 'face 'magit-hash))
@@ -180,6 +194,8 @@
 	     (subj (cdr-safe (assoc 'subject jobj)))
 	     ;; "created": "2016-01-12 20:38:22.000000000",
 	     ;; "updated": "2016-01-12 20:43:10.000000000",
+	     (create (cdr-safe (assoc 'created jobj)))
+	     (update (cdr-safe (assoc 'updated jobj)))
 	     (merg (cdr-safe (assoc 'mergeable jobj)))
 	     (ins_num (cdr-safe (assoc 'insertions jobj)))
 	     (del_num (cdr-safe (assoc 'deletions jobj)))
@@ -189,7 +205,7 @@
 	(when (and num subj branch)
 	  (magit-insert-section (section subj)
 	    (insert (propertize
-		     (magit-review-pp-https-review num subj branch topic merg ins_num del_num)
+		     (magit-review-pp-https-review num subj branch topic create update merg ins_num del_num)
 		     'magit-review-jobj
 		     jobj))
 	    (add-text-properties beg (point) (list 'magit-review-jobj jobj)))
@@ -221,13 +237,14 @@
 	     (owner-name (cdr-safe (assoc 'name owner)))
 	     (message (cdr-safe (assoc 'commitMessage jobj)))
 	     ;;createdOn":1452631102,"lastUpdated":1452631390
-	     )
+	     (create (cdr-safe (assoc 'createdOn jobj)))
+	     (update (cdr-safe (assoc 'lastUpdated jobj))))
 	(if (and beg end)
 	    (delete-region beg end))
 	(when (and num subj branch)
 	  (magit-insert-section (section subj)
 	    (insert (propertize
-		     (magit-review-pp-ssh-review num subj branch topic owner-name)
+		     (magit-review-pp-ssh-review num subj branch topic create update owner-name)
 		     'magit-review-jobj
 		     jobj))
 	    (add-text-properties beg (point) (list 'magit-review-jobj jobj)))
