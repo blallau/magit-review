@@ -48,7 +48,7 @@
 (defvar git-review-file ".gitreview" "git review conf file name")
 
 (defvar gerrit-review-url "https://review.openstack.org/#q,%s,n,z" "Gerrit review URL")
-(defvar review-new-period 1 "")
+(defvar gerrit-review-recent 1 "Recent review in days")
 
 (defvar magit-review-remote "origin"
   "Default remote name to use for gerrit (e.g. \"origin\", \"gerrit\")")
@@ -92,7 +92,27 @@
 			    (date-to-time update)
 			  (seconds-to-time update))))
     (time-less-p (time-subtract current review-update)
-		 (seconds-to-time (* 60 60 review-new-period)))))
+		 (seconds-to-time (* 60 60 24 gerrit-review-recent)))))
+
+(defface magit-review-number-bold
+  '((t :foreground "#ff8700" :weight bold))
+  "Face for the new Gerrit review."
+  :group 'review-faces)
+
+(defface magit-review-number
+  '((t :foreground "#ff8700"))
+  "Face for Gerrit review."
+  :group 'review-faces)
+
+(defface magit-review-title-merg
+  '((t :foreground "#a1db00"))
+  "Face for review mergeable."
+  :group 'review-faces)
+
+(defface magit-review-title-not-merg
+  '((t :foreground "red"))
+  "Face for review not mergeable."
+  :group 'review-faces)
 
 (defun magit-review-pp-https-review (num subj branch topic create update &optional merg ins_num del_num)
   ;; window-width - two prevents long line arrow from being shown
@@ -100,10 +120,9 @@
 
 	 (numstr (propertize (format "%-8s" num)
 			     'face
-			     'magit-hash
-			     ;; (if (is-new-review create update)
-			     ;; 	 'magit-number-bold
-			     ;;   'magit-number)
+			     (if (is-new-review create update)
+			      	 'magit-review-number-bold
+			       'magit-review-number)
 			     ))
 	 (nlen (length numstr))
 
@@ -127,8 +146,8 @@
 	 (subjstr (propertize (magit-review-string-trunc subj subjmaxlen)
 			      'face
 			      (if (equal merg :json-false)
-				  'magit-signature-bad
-				'magit-signature-good)))
+				  'magit-review-title-not-merg
+				'magit-review-title-merg)))
 	 (padding (make-string
 		     (max 0 (- wid (+ nlen 1 (length bt) 2 difflen (length subjstr))))
 		     ? )))
@@ -137,7 +156,12 @@
 (defun magit-review-pp-ssh-review (num subj branch topic create update &optional owner)
   ;; window-width - two prevents long line arrow from being shown
   (let* ((wid (window-width))
-	 (numstr (propertize (format "%-8s" num) 'face 'magit-hash))
+	 (numstr (propertize (format "%-8s" num)
+			     'face
+			     (if (is-new-review create update)
+			      	 'magit-review-number-bold
+			       'magit-review-number)
+			     ))
 	 (nlen (length numstr))
 	 (btmaxlen (/ wid 3))
 	 (ownermaxlen (/ wid 4))
@@ -154,7 +178,7 @@
 	 (subjmaxlen (min 50 (- wid nlen ownermaxlen btmaxlen 6)))
 
 	 (subjstr (propertize (magit-review-string-trunc subj subjmaxlen)
-			      'face 'magit-signature-good))
+			      'face 'magit-review-title-merg))
 	 (padding (make-string
 		     (max 0 (- wid (+ nlen 1 (length subjstr) 1 (length owner) 1 (length bt))))
 		     ? )))
