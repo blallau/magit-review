@@ -48,7 +48,7 @@
 (defvar git-review-file ".gitreview" "git review conf file name")
 
 (defvar gerrit-review-url "https://review.openstack.org/#q,%s,n,z" "Gerrit review URL")
-(defvar gerrit-review-recent 1 "Recent review in days")
+(defvar gerrit-review-recent 24 "Time (in hours) when reviews are declare recent")
 
 (defvar magit-review-remote "origin"
   "Default remote name to use for gerrit (e.g. \"origin\", \"gerrit\")")
@@ -92,7 +92,7 @@
 			    (date-to-time update)
 			  (seconds-to-time update))))
     (time-less-p (time-subtract current review-update)
-		 (seconds-to-time (* 60 60 24 gerrit-review-recent)))))
+		 (seconds-to-time (* 60 60 gerrit-review-recent)))))
 
 (defface magit-review-number-bold
   '((t :foreground "#ff8700" :weight bold))
