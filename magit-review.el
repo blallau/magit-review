@@ -203,7 +203,7 @@
     nil))
 
 (defun json-review-ssh-list-to-clean ()
-  (if (search-forward-regexp "^{\"type\":\"stats\",\"rowCount\":[0-9]+.*}$" (point-max) t)
+  (if (search-forward-regexp "^Found origin Push URL: ssh://.*$" (point-max) t)
       t
     nil))
 
@@ -258,6 +258,7 @@
 	    (forward-line)
 	    (delete-region beg (point-at-bol)))
 	  (search-forward-regexp "^{\"type\":\"stats\",\"rowCount\":[0-9]+,\"runTimeMilliseconds\":[0-9]+,\"moreChanges\":false}$")
+	  (forward-line)
 	  (delete-region (point-at-bol) (point-max))
 	  (goto-char (point-min))))
 
@@ -286,7 +287,7 @@
 		     jobj))
 	    (unless (magit-section-hidden (magit-current-section))
 	      (magit-insert-section (section commit-msg)
-		(insert (magit-review-pp-commit commit-msg) "\n")))
+	    	(insert (magit-review-pp-commit commit-msg) "\n")))
 	    (add-text-properties beg (point) (list 'magit-review-jobj jobj)))
 	  t))))))
 
