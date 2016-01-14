@@ -3,10 +3,11 @@
   * improve error cases during parsing "git review -l"
   * add add-reviewers feature
   * add git review diff display
-  * enhance README.md file
   * integrate git-review to ELPA ???
-  * display review numbers in "Reviews" section title
-  * display reviews newer than X minutes => DONE
+
+* Features done:
+  * display reviews newer than X minutes
+  * enhance README.md file
 
 * Bug:
-  * error during JSON parsing
+  * display review numbers in "Reviews" section title

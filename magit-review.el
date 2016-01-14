@@ -4,7 +4,7 @@
 ;;
 ;; Author: Bertrand Lallau <bertrand.lallau@gmail.com>
 ;; URL: https://github.com/blallau/magit-review
-;; Version: 0.0.1
+;; Version: 0.1.1
 ;; Keywords: tools gerrit git
 ;; Package-Requires: ((emacs "25.0") (magit "2.4.0"))
 ;;

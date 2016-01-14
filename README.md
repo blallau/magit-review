@@ -12,10 +12,9 @@ Download `magit-review.el` and ensure it is in a directory in your `load-path`.
 
 Put something like this in your .emacs
 
-
 	(require 'magit-review)
 	;; Gerrit URL
-	(setq gerrit-review-url "https://review.openstack.org/#q,%s,n,z")
+	(setq magit-review-gerrit-url "https://review.openstack.org/#q,%s,n,z")
 	;; Gerrit remote name can be set with:
 	(setq magit-review-remote "gerrit")
 
