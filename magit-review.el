@@ -220,6 +220,7 @@
 	    (delete-region beg (point-at-bol)))
 	  (search-forward-regexp "^.?\\]$")
 	  (delete-region (point-at-bol) (point-max))
+	  (insert "{}\n")
 	  (goto-char (point-min))))
       ;; process JSON
       (let* ((beg (point))
