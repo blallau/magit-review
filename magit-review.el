@@ -45,19 +45,28 @@
 (require 'json)
 (require 'magit)
 
-(defvar git-review-file ".gitreview" "git review conf file name")
-
-(defvar gerrit-review-url "https://review.openstack.org/#q,%s,n,z" "Gerrit review URL")
-(defvar gerrit-review-recent 24 "Time (in hours) when reviews are declare recent")
-
-(defvar magit-review-remote "origin"
-  "Default remote name to use for gerrit (e.g. \"origin\", \"gerrit\")")
+(defconst git-review-file ".gitreview" "git review conf file name")
 
 (defvar-local git-review-protocol nil "Git protocol used")
 
 (defgroup magit-review nil
-  "magit review custom group"
-  :group 'magit-review)
+  "Review support for Magit."
+  :group 'magit-extensions)
+
+(defcustom magit-review-recent-interval 24
+  "The interval (in hours) in which review are declaring recent."
+  :group 'magit-review
+  :type 'integer)
+
+(defcustom magit-review-gerrit-url "https://review.openstack.org/#q,%s,n,z"
+  "Gerrit URL used to browse review. (Must contain %s. It will be completed with ReviewID)"
+  :group 'magit-review
+  :type 'string)
+
+(defcustom magit-review-remote "origin"
+  "Remote name repository to use for Gerrit (e.g. \"origin\", \"gerrit\")"
+  :group 'magit-review
+  :type 'string)
 
 (defcustom magit-review-popup-prefix (kbd "R")
   "Key code to open magit-review popup"
@@ -92,10 +101,10 @@
 			    (date-to-time update)
 			  (seconds-to-time update))))
     (time-less-p (time-subtract current review-update)
-		 (seconds-to-time (* 60 60 gerrit-review-recent)))))
+		 (seconds-to-time (* 60 60 magit-review-recent-interval)))))
 
 (defface magit-review-number-bold
-  '((t :foreground "#ff8700" :weight bold))
+  '((t :foreground "orange" :weight bold))
   "Face for the new Gerrit review."
   :group 'review-faces)
 
@@ -328,16 +337,13 @@
   (interactive)
   (let ((number (magit-review-number-at-point)))
     (when number
-      (let ((gerrit-url (format gerrit-review-url number)))
+      (let ((gerrit-url (format magit-review-gerrit-url number)))
 	(browse-url gerrit-url)))))
 
 (defun magit-insert-reviews ()
   (magit-review-section 'gerrit-reviews
 			"Reviews:" 'magit-review-wash-reviews
 			(review-query)))
-
-(defun magit-review-popup-args (&optional something)
-  (or (magit-review-arguments) (list "")))
 
 (defun magit-review-push-review (status)
   (let* ((branch (or (magit-get-current-branch)
