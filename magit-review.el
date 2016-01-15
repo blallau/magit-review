@@ -215,10 +215,9 @@
       (let ((json-to-clean (save-excursion (json-review-https-list-to-clean))))
 	(when json-to-clean
 	  (let ((beg (point)))
-	    (search-forward-regexp "^\\[.?$")
-	    (forward-line)
-	    (delete-region beg (point-at-bol)))
-	  (search-forward-regexp "^.?\\]$")
+	    (search-forward-regexp "^\\[")
+	    (delete-region beg (point)))
+	  (search-forward-regexp "\\]$")
 	  (delete-region (point-at-bol) (point-max))
 	  (insert "{}\n")
 	  (goto-char (point-min))))
@@ -230,8 +229,6 @@
 	     (topic (cdr-safe (assoc 'topic jobj)))
 	     (change_id (cdr-safe (assoc 'change_id jobj)))
 	     (subj (cdr-safe (assoc 'subject jobj)))
-	     ;; "created": "2016-01-12 20:38:22.000000000",
-	     ;; "updated": "2016-01-12 20:43:10.000000000",
 	     (create (cdr-safe (assoc 'created jobj)))
 	     (update (cdr-safe (assoc 'updated jobj)))
 	     (merg (cdr-safe (assoc 'mergeable jobj)))
@@ -275,7 +272,6 @@
 	     (owner (cdr-safe (assoc 'owner jobj)))
 	     (owner-name (cdr-safe (assoc 'name owner)))
 	     (commit-msg (cdr-safe (assoc 'commitMessage jobj)))
-	     ;;createdOn":1452631102,"lastUpdated":1452631390
 	     (create (cdr-safe (assoc 'createdOn jobj)))
 	     (update (cdr-safe (assoc 'lastUpdated jobj))))
 	(if (and beg end)
