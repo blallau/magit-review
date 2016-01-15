@@ -1,4 +1,5 @@
 * Features:
+
   * GLOBAL:
 	* improve error cases during parsing "git review -l"
 	* add add-reviewers feature
@@ -7,6 +8,3 @@
 
   * SSH:
 	* optionaly display commit message
-
-  * HTTP:
-  	* display review numbers in "Reviews" section title
