@@ -30,6 +30,23 @@ https://github.com/blallau/magit-review
 
     * https://github.com/terranpro/magit-gerrit
 
+# Magit Review Configuration
+
+For simple setups, it should be enough to set the default value for
+`magit-review-gerrit-url` and `magit-review-remote` as shown above.
+
+For per project configurations, consider using buffer local or directory local
+variables.
+
+
+`/home/dev/code/prj1/.dir-locals.el`:
+
+```
+((magit-mode .
+      ((magit-review-gerrit-url . "https://review.openstack.org/#q,%s,n,z")
+       (magit-review-remote . "gerrit"))))
+```
+
 # Author
 
 Bertrand Lallau  ( bertrand.lallau@gmail.com )
