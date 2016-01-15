@@ -22,14 +22,6 @@ Put something like this in your .emacs
 
 M-x magit-status
 
-# Links
-
-https://github.com/blallau/magit-review
-
-* Inspired by :
-
-    * https://github.com/terranpro/magit-gerrit
-
 # Magit Review Configuration
 
 For simple setups, it should be enough to set the default value for
@@ -50,6 +42,14 @@ variables.
 # Author
 
 Bertrand Lallau  ( bertrand.lallau@gmail.com )
+
+# Links
+
+https://github.com/blallau/magit-review
+
+* Inspired by :
+
+    * https://github.com/terranpro/magit-gerrit
 
 # Acknowledgements
 
