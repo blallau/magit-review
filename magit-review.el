@@ -324,7 +324,7 @@
       (let ((ref (magit-review-number-at-point))
 	    (topic (cdr (assoc 'topic jobj)))
 	    (dir default-directory))
-	(let* ((magit-proc (magit-run-git-async-no-revert "review" "-d" ref)))
+	(let* ((magit-proc (magit-run-git-async "review" "-d" ref)))
 	  (message (format "Waiting git review -d %s to complete..." ref))
 	  (magit-process-wait))
 	(message (format "Checking out to %s in %s" topic dir))))))
